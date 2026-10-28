@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Personal Expense Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 30px auto; padding: 0 15px; }
+    input, select { margin: 4px 0; padding: 5px; }
+    button { padding: 5px 12px; }
+    #message { font-weight: bold; min-height: 24px; }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>Personal Expense Tracker</h1>
+
+  <p id="message"></p>
+
+  <h2>Add Expense</h2>
+  <input type="text" id="add-description" placeholder="Description (e.g. Lunch)"><br>
+  <input type="number" id="add-amount" placeholder="Amount" step="any"><br>
+  <select id="add-category">
+    <option>Food</option>
+    <option>Travel</option>
+    <option>Bills</option>
+    <option>Shopping</option>
+    <option>Other</option>
+  </select><br>
+  <button onclick="addExpense()">Add</button>
+
+  <h2>Update Expense</h2>
+  <input type="number" id="update-id" placeholder="Expense ID"><br>
+  <input type="text" id="update-description" placeholder="New description"><br>
+  <input type="number" id="update-amount" placeholder="New amount" step="any"><br>
+  <select id="update-category">
+    <option>Food</option>
+    <option>Travel</option>
+    <option>Bills</option>
+    <option>Shopping</option>
+    <option>Other</option>
+  </select><br>
+  <button onclick="updateExpense()">Update</button>
+
+  <h2>Delete Expense</h2>
+  <input type="number" id="delete-id" placeholder="Expense ID">
+  <button onclick="deleteExpense()">Delete</button>
+
+  <h2>All Expenses</h2>
+  <button onclick="viewExpenses()">Refresh list</button>
+  <ul id="expense-list"></ul>
+
+  <script>
+    const API_URL = "http://127.0.0.1:8000/expenses";
+
+    function showMessage(text, type) {
+      const message = document.getElementById("message");
+      message.textContent = text;
+      message.className = type;
+    }
+
+    async function addExpense() {
+      const description = document.getElementById("add-description").value;
+      const amount = Number(document.getElementById("add-amount").value);
+      const category = document.getElementById("add-category").value;
+
+      if (description.trim() === "") {
+        showMessage("Please enter a description", "error");
+        return;
+      }
+      if (isNaN(amount) || amount <= 0) {
+        showMessage("Amount must be greater than 0", "error");
+        return;
+      }
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ description, amount, category })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage(data.message, "success");
+          document.getElementById("add-description").value = "";
+          document.getElementById("add-amount").value = "";
+          viewExpenses();
+        } else {
+          showMessage(Array.isArray(data.detail) ? data.detail[0].msg : data.detail, "error");
+        }
+      } catch (error) {
+        showMessage("Could not connect to the server.", "error");
+      }
+    }
+
+    async function viewExpenses() {
+      try {
+        const response = await fetch(API_URL);
+        const expenses = await response.json();
+
+        const list = document.getElementById("expense-list");
+        list.innerHTML = "";
+
+        if (expenses.length === 0) {
+          list.innerHTML = "<li>No expenses yet</li>";
+          return;
+        }
+
+        for (const exp of expenses) {
+          const item = document.createElement("li");
+          item.textContent = `ID ${exp.id}: ${exp.description} - Rs ${exp.amount} (${exp.category})`;
+          list.appendChild(item);
+        }
+      } catch (error) {
+        showMessage("Could not connect to the server. Is it running?", "error");
+      }
+    }
+
+    async function updateExpense() {
+      const id = document.getElementById("update-id").value;
+      const description = document.getElementById("update-description").value;
+      const amount = Number(document.getElementById("update-amount").value);
+      const category = document.getElementById("update-category").value;
+
+      if (id === "") {
+        showMessage("Please enter the expense ID", "error");
+        return;
+      }
+      if (description.trim() === "") {
+        showMessage("Please enter a description", "error");
+        return;
+      }
+      if (isNaN(amount) || amount <= 0) {
+        showMessage("Amount must be greater than 0", "error");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ description, amount, category })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage(data.message, "success");
+          viewExpenses();
+        } else {
+          showMessage(Array.isArray(data.detail) ? data.detail[0].msg : data.detail, "error");
+        }
+      } catch (error) {
+        showMessage("Could not connect to the server. Is it running?", "error");
+      }
+    }
+
+    async function deleteExpense() {
+      const id = document.getElementById("delete-id").value;
+
+      if (id === "") {
+        showMessage("Please enter the expense ID", "error");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage(data.message, "success");
+          document.getElementById("delete-id").value = "";
+          viewExpenses();
+        } else {
+          showMessage(data.detail, "error");
+        }
+      } catch (error) {
+        showMessage("Could not connect to the server. Is it running?", "error");
+      }
+    }
+
+    viewExpenses();
+  </script>
+</body>
+</html>

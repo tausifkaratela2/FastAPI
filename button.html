@@ -1,0 +1,49 @@
+Name: <input id="name" type="text" placeholder="Enter your name" />
+<button onclick="hello()">Click Me </button>
+<br>
+<p id="output"></p>
+<script>
+    function hello()
+    {
+        var name = document.getElementById("name").value;
+        document.getElementById("output").textContent = "Hello, " + name + "!   !";    }
+</script>
+
+Name: <input id="calculator1" type="text" placeholder="Enter a number" />
+Name: <input id="calculator2" type="text" placeholder="Enter a number" />
+<button onclick="calculate('Add')">Add</button>
+<button onclick="calculate('subtract')">subtract</button>
+<button onclick="calculate('Multiply')">Multiply</button>
+<button onclick="calculate('Divide')">Divide</button>
+<br>
+<p id="result"></p>
+<script>
+    function calculate()
+    {
+        const n1 = parseFloat(document.getElementById("calculator1").value);
+        const n2 = parseFloat(document.getElementById("calculator2").value);
+        const resultElement = document.getElementById("result");
+
+        if (isNaN(n1) || isNaN(n2)) {
+            resultElement.textContent = "Please enter valid numbers.";
+            return;
+        }
+        let ans;
+        if (operation === "Add") {
+            ans = n1 + n2;
+        } else if (operation === "subtract") {
+            ans = n1 - n2;
+        } else if (operation === "Multiply") {
+            ans = n1 * n2;
+        } else if (operation === "Divide") {
+            if (n2 === 0) {
+                resultElement.textContent = "Cannot divide by zero.";
+                return;
+            }
+            ans = n1 / n2;
+        } else {
+            resultElement.textContent = "Unknown operation.";
+            return;
+        }
+    }
+</script>

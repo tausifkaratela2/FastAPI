@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Library Management</title>
+</head>
+<body>
+
+  <h2>Library Management</h2>
+
+  <label for="libId">Library ID:</label>
+  <input type="number" id="libId"><br><br>
+
+  <label for="libName">Name:</label>
+  <input type="text" id="libName"><br><br>
+
+  <label for="libLocation">Location:</label>
+  <input type="text" id="libLocation"><br><br>
+
+  <button onclick="addLibrary()">Add (Create)</button>
+  <button onclick="getLibrary()">Get by ID (Read)</button>
+  <button onclick="getAllLibraries()">Get All</button>
+  <button onclick="updateLibrary()">Update</button>
+  <button onclick="deleteLibrary()">Delete</button>
+
+  <p id="result"></p>
+
+  <script>
+    const BASE_URL = "http://127.0.0.1:8000";
+
+    async function addLibrary() {
+      const id = parseInt(document.getElementById("libId").value);
+      const name = document.getElementById("libName").value.trim();
+      const location = document.getElementById("libLocation").value.trim();
+
+      if (isNaN(id) || !name || !location) {
+        document.getElementById("result").innerText = "Please provide ID, Name, and Location.";
+        return;
+      }
+
+      const response = await fetch(`${BASE_URL}/library`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, name, location })
+      });
+      const data = await response.json();
+      document.getElementById("result").innerText = "Created = " + JSON.stringify(data);
+    }
+
+    async function getLibrary() {
+      const id = document.getElementById("libId").value;
+      if (!id) {
+        document.getElementById("result").innerText = "Please enter an ID to fetch.";
+        return;
+      }
+
+      const response = await fetch(`${BASE_URL}/library/${id}`);
+      const data = await response.json();
+      document.getElementById("result").innerText = "Result = " + JSON.stringify(data);
+    }
+
+    async function getAllLibraries() {
+      const response = await fetch(`${BASE_URL}/libraries`);
+      const data = await response.json();
+      document.getElementById("result").innerText = "All Libraries = " + JSON.stringify(data);
+    }
+
+    async function updateLibrary() {
+      const id = parseInt(document.getElementById("libId").value);
+      const name = document.getElementById("libName").value.trim();
+      const location = document.getElementById("libLocation").value.trim();
+
+      if (isNaN(id) || !name || !location) {
+        document.getElementById("result").innerText = "Please provide ID, Name, and Location to update.";
+        return;
+      }
+
+      const response = await fetch(`${BASE_URL}/library/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, name, location })
+      });
+      const data = await response.json();
+      document.getElementById("result").innerText = "Updated = " + JSON.stringify(data);
+    }
+
+    async function deleteLibrary() {
+      const id = document.getElementById("libId").value;
+      if (!id) {
+        document.getElementById("result").innerText = "Please enter an ID to delete.";
+        return;
+      }
+
+      const response = await fetch(`${BASE_URL}/library/${id}`, {
+        method: "DELETE"
+      });
+      const data = await response.json();
+      document.getElementById("result").innerText = "Deleted = " + JSON.stringify(data);
+    }
+  </script>
+
+</body>
+</html>

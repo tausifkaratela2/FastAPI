@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Students Management</title>
+</head>
+<body>
+
+  <h2>Students Management</h2>
+
+  <label for="studentId">Student ID:</label>
+  <input type="number" id="studentId"><br><br>
+
+  <label for="studentName">Name:</label>
+  <input type="text" id="studentName"><br><br>
+
+  <label for="studentCourse">Course:</label>
+  <input type="text" id="studentCourse"><br><br>
+
+  <button onclick="addStudent()">Add (Create)</button>
+  <button onclick="getStudent()">Get by ID (Read)</button>
+  <button onclick="getAllStudents()">Get All</button>
+  <button onclick="updateStudent()">Update</button>
+  <button onclick="deleteStudent()">Delete</button>
+
+  <p id="result"></p>
+
+  <script>
+    const BASE_URL = "http://127.0.0.1:8000";
+
+    async function addStudent() {
+      const id = parseInt(document.getElementById("studentId").value);
+      const name = document.getElementById("studentName").value.trim();
+      const course = document.getElementById("studentCourse").value.trim();
+
+      if (isNaN(id) || !name || !course) {
+        document.getElementById("result").innerText = "Please provide ID, Name, and Course.";
+        return;
+      }
+
+      const response = await fetch(`${BASE_URL}/students`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, name, course })
+      });
+      const data = await response.json();
+      document.getElementById("result").innerText = "Created = " + JSON.stringify(data);
+    }
+
+    async function getStudent() {
+      const id = document.getElementById("studentId").value;
+      if (!id) {
+        document.getElementById("result").innerText = "Please enter an ID to fetch.";
+        return;
+      }
+
+      const response = await fetch(`${BASE_URL}/students/${id}`);
+      const data = await response.json();
+      document.getElementById("result").innerText = "Result = " + JSON.stringify(data);
+    }
+
+    async function getAllStudents() {
+      const response = await fetch(`${BASE_URL}/students`);
+      const data = await response.json();
+      document.getElementById("result").innerText = "All Students = " + JSON.stringify(data);
+    }
+
+    async function updateStudent() {
+      const id = parseInt(document.getElementById("studentId").value);
+      const name = document.getElementById("studentName").value.trim();
+      const course = document.getElementById("studentCourse").value.trim();
+
+      if (isNaN(id) || !name || !course) {
+        document.getElementById("result").innerText = "Please provide ID, Name, and Course to update.";
+        return;
+      }
+
+      const response = await fetch(`${BASE_URL}/students/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, name, course })
+      });
+      const data = await response.json();
+      document.getElementById("result").innerText = "Updated = " + JSON.stringify(data);
+    }
+
+    async function deleteStudent() {
+      const id = document.getElementById("studentId").value;
+      if (!id) {
+        document.getElementById("result").innerText = "Please enter an ID to delete.";
+        return;
+      }
+
+      const response = await fetch(`${BASE_URL}/students/${id}`, {
+        method: "DELETE"
+      });
+      const data = await response.json();
+      document.getElementById("result").innerText = "Deleted = " + JSON.stringify(data);
+    }
+  </script>
+
+</body>
+</html>
